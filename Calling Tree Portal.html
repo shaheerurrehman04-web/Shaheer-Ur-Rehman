@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Support - Calling Tree Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #0B132B; /* Dark Blue base */
+            color: #F4F6FC;
+            font-family: 'Inter', sans-serif;
+        }
+        .dark-card {
+            background-color: #1C2541; /* Deep navy card */
+            border: 1px solid #3A506B;
+        }
+        .accent-blue {
+            background-color: #48CAE4;
+        }
+        .btn-primary {
+            background-color: #0077B6;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #0096C7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-[#0b1226] border-b border-[#1E293B] px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-[#0077B6] rounded-lg">
+                    <i data-lucide="network" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider text-white">NEXUS SUPPORT</h1>
+                    <p class="text-xs text-slate-400">Field Team Calling Tree & Store Directory</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Admin Lock / Unlock Status Indicator -->
+                <button id="admin-toggle-btn" onclick="toggleAdminMode()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all text-sm font-semibold">
+                    <i data-lucide="lock" id="admin-icon" class="w-4 h-4 text-amber-500"></i>
+                    <span id="admin-status-text">Admin Login</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
+
+        <!-- Top Overview Statistics Dashboard -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- District Managers Card -->
+            <div class="dark-card p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-cyan-900/40 rounded-lg text-cyan-400">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase">District Managers</p>
+                    <p class="text-xl font-bold text-white" id="stat-dm-count">18</p>
+                </div>
+            </div>
+            <!-- Active Markets Card -->
+            <div class="dark-card p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-indigo-900/40 rounded-lg text-indigo-400">
+                    <i data-lucide="map" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase">Active Markets</p>
+                    <p class="text-xl font-bold text-white" id="stat-market-count">12</p>
+                </div>
+            </div>
+            <!-- Total Stores Card -->
+            <div class="dark-card p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-teal-900/40 rounded-lg text-teal-400">
+                    <i data-lucide="store" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase">Total Stores</p>
+                    <p class="text-xl font-bold text-white" id="stat-store-count">135</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Tree & Filters Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Panel: Filters & Calling Hierarchy Map -->
+            <div class="dark-card p-5 rounded-2xl h-fit space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="sliders-horizontal" class="w-5 h-5 text-blue-400"></i>
+                        Filter Records
+                    </h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-400 block mb-1 font-medium">Search Store ID, Name, or Address</label>
+                            <div class="relative">
+                                <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search..." class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 pl-10 text-white focus:outline-none focus:border-blue-500">
+                                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-slate-400 block mb-1 font-medium">Select District Manager</label>
+                            <select id="dm-select" onchange="applyFilters()" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                                <option value="">All District Managers</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-slate-400 block mb-1 font-medium">Select Market Area</label>
+                            <select id="market-select" onchange="applyFilters()" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                                <option value="">All Markets</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Calling Tree Visualization -->
+                <div class="pt-4 border-t border-slate-700">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Call Escalation Order</h3>
+                    <div class="space-y-4 relative">
+                        <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-blue-500/30"></div>
+                        
+                        <div class="flex gap-3 items-start relative z-10">
+                            <div class="w-8 h-8 rounded-full bg-blue-900 border border-blue-500 flex items-center justify-center text-xs font-bold text-white">1</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Store Team (Field Agent)</h4>
+                                <p class="text-xs text-slate-400">Initiates local response plan</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start relative z-10">
+                            <div class="w-8 h-8 rounded-full bg-cyan-900 border border-cyan-500 flex items-center justify-center text-xs font-bold text-white">2</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">District Manager (DM)</h4>
+                                <p class="text-xs text-slate-400" id="escalation-dm-name">Direct escalation contact</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start relative z-10">
+                            <div class="w-8 h-8 rounded-full bg-indigo-900 border border-indigo-500 flex items-center justify-center text-xs font-bold text-white">3</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Managing Director (MD)</h4>
+                                <p class="text-xs text-slate-400">Regional HQ Escalation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Action Center Panel (Hidden for Viewers) -->
+                <div id="admin-panel" class="hidden pt-4 border-t border-slate-700 space-y-3">
+                    <h3 class="text-xs font-bold text-amber-500 uppercase tracking-widest">Admin Control Actions</h3>
+                    <button onclick="openStoreModal()" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm flex items-center justify-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Store Node
+                    </button>
+                    <!-- Global Manager Reassignment Trigger -->
+                    <button onclick="openGlobalModal()" class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2">
+                        <i data-lucide="git-merge" class="w-4 h-4"></i> Global Reassign Tool
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: List & Cards View -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i data-lucide="list" class="w-5 h-5 text-blue-400"></i>
+                        Store Directory & Routing List
+                    </h2>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                        <span id="results-count" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full whitespace-nowrap">Showing all items</span>
+                        <!-- Public Export Button -->
+                        <button onclick="exportToCSV()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs font-medium flex items-center gap-1.5 border border-slate-700">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Store Grid List Container -->
+                <div id="store-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards are dynamically rendered via javascript -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#0b1226] border-t border-[#1E293B] py-6 text-center text-xs text-slate-400 mt-12">
+        <p>© 2026 Nexus Support Portal. Secure Data Connection Verified.</p>
+    </footer>
+
+    <!-- Add/Edit Store Modal Window -->
+    <div id="store-modal" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+        <div class="bg-[#1C2541] border border-slate-700 rounded-2xl w-full max-w-md p-6 relative">
+            <h3 id="modal-title" class="text-lg font-bold text-white mb-4">Add Store Node</h3>
+            <button onclick="closeStoreModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <form id="store-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="modal-store-idx">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Store ID</label>
+                    <input type="text" id="modal-store-id" required placeholder="e.g., PURECOR014" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Store Name</label>
+                    <input type="text" id="modal-store-name" required placeholder="e.g., Airline" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Market Area</label>
+                    <input type="text" id="modal-market" required placeholder="e.g., CORPUS CHRISTI" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none" list="market-datalist">
+                    <datalist id="market-datalist"></datalist>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">District Manager (DM)</label>
+                    <input type="text" id="modal-dm" required placeholder="e.g., WAQAS IQBAL" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none" list="dm-datalist">
+                    <datalist id="dm-datalist"></datalist>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Managing Director (MD)</label>
+                    <input type="text" id="modal-md" required value="WAQAS IQBAL" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Address</label>
+                    <textarea id="modal-address" required placeholder="Full Store Address" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none h-20"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeStoreModal()" class="w-1/2 py-2 rounded-lg bg-slate-700 text-white font-medium text-sm hover:bg-slate-600">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-500">Save Node</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global Reassignment Modal Window -->
+    <div id="global-modal" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+        <div class="bg-[#1C2541] border border-slate-700 rounded-2xl w-full max-w-md p-6 relative">
+            <h3 class="text-lg font-bold text-white mb-2">Global Hierarchy Tool</h3>
+            <p class="text-xs text-slate-400 mb-4">Instantly rename, change, or remove roles across all matching store records globally.</p>
+            <button onclick="closeGlobalModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <form id="global-form" onsubmit="handleGlobalSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1 font-semibold">1. Choose Field to Change</label>
+                    <select id="global-type" onchange="updateGlobalModalDropdown()" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                        <option value="dm">District Manager (DM)</option>
+                        <option value="md">Managing Director (MD)</option>
+                        <option value="market">Market Area Name</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1 font-semibold">2. Select Current Manager / Name</label>
+                    <select id="global-current-value" required class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                        <!-- Filled dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1 font-semibold">3. Enter New Manager / Name</label>
+                    <input type="text" id="global-new-value" required placeholder="Type new name (e.g. VACANT or a person's name)" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <p class="text-[10px] text-slate-500 mt-1">To remove, you can replace with "VACANT", "UNASSIGNED", or another active manager.</p>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeGlobalModal()" class="w-1/2 py-2 rounded-lg bg-slate-700 text-white font-medium text-sm hover:bg-slate-600">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2 rounded-lg bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-500 flex items-center justify-center gap-1">
+                        <i data-lucide="check-square" class="w-4 h-4"></i> Update Globally
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Area containing Dataset & App logic -->
+    <script>
+        // Default Dataset extracted from user's CSV data
+        const initialDataset = [
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR013", storeName: "6410 WEBER", address: "6410 WEBER RD - CORPUS CHRISTI, TX 78413"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR001", storeName: "AIRLINE", address: "1446 AIRLINE RD - Corpus Christi, TX 78412"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR002", storeName: "BEL AIRE", address: "2777 S STAPLES ST - CORPUS CHRISTI, TX 78404"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR003", storeName: "HEB - FLOUR BLUFF", address: "1145 WALDRON RD - CORPUS CHRISTI, TX 78418"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR005", storeName: "INGLESIDE", address: "2334 TX 361 - INGLESIDE, TX 78362"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR008", storeName: "PORT", address: "3222 S PORT AVE - CORPUS CHRISTI, TX 78415"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR010", storeName: "STAPLES", address: "5702 S STAPLES ST - CORPUS CHRISTI, TX 78413"},
+            {market: "CORPUS CHRISTI", md: "WAQAS IQBAL", dm: "WAQAS IQBAL", storeId: "PURECOR012", storeName: "WOODLAWN", address: "3701 LEOPARD ST - CORPUS CHRISTI, TX 78408"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR004", storeName: "BONHAM", address: "2011 N STATE HIGHWAY 121 - BONHAM, TX 75418"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR002", storeName: "CLARKSVILLE", address: "1404 CLARKSVILLE ST - PARIS, TX 75460"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR008", storeName: "CROWLEY", address: "7701 CROWLEY RD - FORT WORTH, TX 76134"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR003", storeName: "LAMAR", address: "3912 LAMAR AVE - PARIS, TX 75462"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR007", storeName: "MANSFIELD", address: "593 W DEBBIE LN - MANSFIELD, TX 76063"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR006", storeName: "MINERAL WELLS", address: "2801 HIGHWAY 180 E - MINERAL WELLS, TX 76067"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR001", storeName: "SHERMAN", address: "738 US HIGHWAY 82 E - SHERMAN, TX 75090"},
+            {market: "DALLAS", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PUREPAR005", storeName: "WEATHERFORD", address: "1418 S MAIN ST - WEATHERFORD, TX 76086"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU067", storeName: "ROCKON 10950 BISSONNET", address: "10950 BISSONNET ST - HOUSTON, TX 77099"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU113", storeName: "ROCKON 1793 FRY", address: "1793 FRY RD - KATY, TX 77449"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU112", storeName: "ROCKON 6078 FRY", address: "6078 FRY RD STE I - KATY, TX 77449"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU065", storeName: "ROCKON 6102 BISSONNET", address: "6102 BISSONNET ST - HOUSTON, TX 77081"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU041", storeName: "ROCKON BELLAIRE", address: "7710 BELLAIRE BLVD - HOUSTON, TX 77036"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU066", storeName: "ROCKON BRIAR FOREST", address: "11102 BRIAR FOREST DR - HOUSTON, TX 77042"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU042", storeName: "ROCKON CHIMNEY", address: "11338 CHIMNEY ROCK RD - HOUSTON, TX 77035"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU037", storeName: "ROCKON GESSNER", address: "6811 S GESSNER RD - HOUSTON, TX 77036"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU030", storeName: "ROCKON KATY", address: "3051 FRY RD - KATY, TX 77449"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU035", storeName: "ROCKON ROSENBERG", address: "5715 READING RD - ROSENBERG, TX 77471"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU039", storeName: "ROCKON WALLER", address: "205 WALLER AVE - BROOKSHIRE, TX 77423"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ALNAWAZ BUDHWANI", storeId: "PUREHOU115", storeName: "ROCKON WESTHEIMER", address: "10206 WESTHEIMER RD - Houston, TX 77042"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU059", storeName: "ROCKON 8602 BROADWAY ST", address: "8602 BROADWAY ST - HOUSTON, TX 77061"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU119", storeName: "ROCKON 9TH AVE", address: "2028 9TH AVE N STE 200 - TEXAS CITY, TX 77590"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU105", storeName: "ROCKON BACLIFF", address: "850 GRAND AVE - BACLIFF, TX 77518"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU038", storeName: "ROCKON COLLEGE", address: "1001 COLLEGE AVE - SOUTH HOUSTON, TX 77587"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU106", storeName: "ROCKON DICKINSON", address: "4224 FM 517 RD E - DICKINSON, TX 77539"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU108", storeName: "ROCKON GALVESTON", address: "2523 BROADWAY ST - GALVESTON, TX 77550"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU107", storeName: "ROCKON LAMARQUE", address: "5314 FM 1765 - TEXAS CITY, TX 77591"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU130", storeName: "ROCKON NASA", address: "552 W NASA PKWY - WEBSTER, TX 77598"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "ASAD AHMED", storeId: "PUREHOU063", storeName: "ROCKON SPENCER", address: "1618 SPENCER HWY - SOUTH HOUSTON, TX 77587"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU111", storeName: "ROCKON 8119 ANTOINE", address: "8119 ANTOINE DR - HOUSTON, TX 77088"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU131", storeName: "ROCKON 8821 ANTOINE", address: "8821 ANTOINE DR - HOUSTON, TX 77088"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU024", storeName: "ROCKON ALDINE", address: "5355 ALDINE MAIL ROUTE RD - HOUSTON, TX 77039"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU088", storeName: "ROCKON BAYTOWN", address: "1101 N ALEXANDER DR - BAYTOWN, TX 77520"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU087", storeName: "ROCKON CROSBY", address: "105 KENNINGS RD - CROSBY, TX 77532"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU061", storeName: "ROCKON HIGHLANDS", address: "302 N MAIN ST - HIGHLANDS, TX 77562"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU114", storeName: "ROCKON IRVINGTON", address: "8700 IRVINGTON BLVD - HOUSTON, TX 77022"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU028", storeName: "ROCKON LYONS", address: "6715 LYONS AVE - HOUSTON, TX 77020"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU043", storeName: "ROCKON NEW TIDWELL", address: "319 TIDWELL RD - HOUSTON, TX 77022"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU047", storeName: "ROCKON SHELDON", address: "777 SHELDON RD - CHANNELVIEW, TX 77530"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU036", storeName: "ROCKON TIDWELL", address: "920 E TIDWELL RD - HOUSTON, TX 77022"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "HASSAN MEHMOOD", storeId: "PUREHOU132", storeName: "ROCKON UVALDE", address: "18 UVALDE RD STE D - HOUSTON, TX 77015"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU102", storeName: "ROCKON 1424 CYPRESS FOODTOWN", address: "1424A CYPRESS CREEK PKWY - HOUSTON, TX 77090"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU101", storeName: "ROCKON 3645 CYPRESS", address: "3645 CYPRESS CREEK PKWY - HOUSTON, TX 77068"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU027", storeName: "ROCKON 7444 TIDWELL", address: "7444 W TIDWELL RD - HOUSTON, TX 77040"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU032", storeName: "ROCKON AIRLINE", address: "11130 AIRLINE DR - HOUSTON, TX 77037"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU135", storeName: "ROCKON ALDINE WESTFIELD", address: "23221 ALDINE WESTFIELD ROAD SUITE 1400 - SPRING, TX 77373"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU033", storeName: "ROCKON ANTOINE", address: "7028 ANTOINE DR - HOUSTON, TX 77088"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU100", storeName: "ROCKON HOLLOW TREE", address: "419 HOLLOW TREE LN - HOUSTON, TX 77090"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU134", storeName: "ROCKON LITTLE YORK", address: "740 W LITTLE YORK RD - HOUSTON, TX 77091"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU034", storeName: "ROCKON MAIN", address: "5801 ANTOINE DR - HOUSTON, TX 77091"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU099", storeName: "ROCKON NEW ANTOINE", address: "12228 ANTOINE DR - HOUSTON, TX 77066"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU098", storeName: "ROCKON NEW VETERANS", address: "10201 VETERANS MEMORIAL DR - HOUSTON, TX 77038"},
+            {market: "HOUSTON", md: "WAQAS IQBAL", dm: "NOORSHIL TODAI", storeId: "PUREHOU045", storeName: "ROCKON TOMBALL", address: "28418 STATE HIGHWAY 249 - TOMBALL, TX 77375"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR009", storeName: "CALTON", address: "502 W CALTON RD STE 202 - LAREDO, TX 78041"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR010", storeName: "CHIHUAHUA", address: "719 CHIHUAHUA ST STE 107 - LAREDO, TX 78040"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR011", storeName: "HEB - SAN DARIO", address: "4801 SAN DARIO AVE - LAREDO, TX 78041"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR012", storeName: "JAIME ZAPATA", address: "4205 JAIME ZAPATA MEMORIAL HWY STE 21 - LAREDO, TX 78043"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR013", storeName: "MCPHERSON", address: "4201 MCPHERSON AVE STE 101 - LAREDO, TX 78041"},
+            {market: "LAREDO", md: "WAQAS IQBAL", dm: "SULTAN JARRAL", storeId: "PURELAR014", storeName: "SAN BERNARDO", address: "3402 SAN BERNARDO AVE STE 2 - LAREDO, TX 78040"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU093", storeName: "ROCKON 16TH ST", address: "1501-B 16TH ST - ORANGE, TX 77630"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU129", storeName: "ROCKON DOWLEN", address: "4105 DOWLEN RD STE G - BEAUMONT, TX 77706"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU095", storeName: "ROCKON GERSTNER", address: "1717 GERSTNER MEMORIAL DR - LAKE CHARLES, LA 70601"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU091", storeName: "ROCKON GULFWAY", address: "4010 GULFWAY DR - PORT ARTHUR, TX 77642"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU090", storeName: "ROCKON MEMORIAL", address: "2427 MEMORIAL BLVD - PORT ARTHUR, TX 77640"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU089", storeName: "ROCKON NEDERLAND", address: "3526 HIGHWAY 365 - NEDERLAND, TX 77627"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU094", storeName: "ROCKON PRIEN LAKE", address: "301 WEST PRIEN LAKE ROAD - LAKE CHARLES, LA 70601"},
+            {market: "LOUISIANA", md: "WAQAS IQBAL", dm: "AQEEL QAZI", storeId: "PUREHOU133", storeName: "ROCKON WASHINGTON", address: "2751 WASHINGTON BLVD - BEAUMONT, TX 77705"},
+            {market: "LUFKIN", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PURELUF002", storeName: "LUFKIN-CHESTNUT", address: "103 N CHESTNUT ST - LUFKIN, TX 75901"},
+            {market: "LUFKIN", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PURELUF001", storeName: "LUFKIN-JOHN", address: "3007 S JOHN REDDITT DR - LUFKIN, TX 75904"},
+            {market: "LUFKIN", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PURELUF004", storeName: "NACOGDOCHES-NORTH", address: "2415 NORTH ST - NACOGDOCHES, TX 75965"},
+            {market: "LUFKIN", md: "WAQAS IQBAL", dm: "SHAFQAT HUSSAIN", storeId: "PURELUF003", storeName: "NACOGDOCHES-SOUTH", address: "1019 SOUTH ST - NACOGDOCHES, TX 75964"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX014", storeName: "10429 N 19TH AVE", address: "10429 N 19TH AVE - PHOENIX, AZ 85021"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX018", storeName: "169 BROADWAY", address: "169 E BROADWAY RD - MESA, AZ 85210"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX015", storeName: "2918 NORTH 40TH ST", address: "2918 NORTH 40TH STREET - PHOENIX, AZ 85018"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX016", storeName: "303 E SOUTHERN AVE STE 107", address: "303 E SOUTHERN AVE STE 107 - MESA, AZ 85210"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX017", storeName: "606 E MAIN ST STE 104", address: "606 E MAIN ST STE 104 - MESA, AZ 85203"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX020", storeName: "BASELINE", address: "1635 E BASELINE RD STE 110 - PHOENIX, AZ 85042"},
+            {market: "PHOENIX", md: "WAQAS IQBAL", dm: "RAMEEZUDDIN KHAZI", storeId: "PUREPHX019", storeName: "N 83RD", address: "4840 N 83RD AVE STE 104 - PHOENIX, AZ 85033"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ASMITA JAIN", storeId: "PURERGV032", storeName: "DICKER", address: "1901 W DICKER DR STE 1 - PHARR, TX 78577"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ASMITA JAIN", storeId: "PURERGV012", storeName: "LAS MILPAS", address: "6708 S CAGE BLVD - PHARR, TX 78577"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ASMITA JAIN", storeId: "PURERGV001", storeName: "ALAMO", address: "1716 N ALAMO RD - ALAMO, TX 78516"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ASMITA JAIN", storeId: "PURERGV015", storeName: "CAGE", address: "1300 S CAGE BLVD - PHARR, TX 78577"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ASMITA JAIN", storeId: "PURERGV025", storeName: "NEW CAGE", address: "614 S CAGE BLVD - PHARR, TX 78577"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV037", storeName: "BROWNSVILLE", address: "801 INTERNATIONAL BOULEVARD SUITE 1 - BROWNSVILLE, TX 78520"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV002", storeName: "DONNA", address: "221 N SALINAS BLVD - DONNA, TX 78537"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV004", storeName: "HARLINGEN", address: "406A DIXIELAND RD - HARLINGEN, TX 78552"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV010", storeName: "HEB- WESLACO", address: "1004 N TEXAS BLVD - WESLACO, TX 78596"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV014", storeName: "MERCEDES", address: "359 N TEXAS AVE - MERCEDES, TX 78570"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV028", storeName: "FRONTAGE", address: "506 E FRONTAGE RD STE 2 - ALAMO, TX 78516"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "ERIC SANCHEZ", storeId: "PURERGV009", storeName: "SAN JUAN", address: "901 W INTERSTATE 2 - SAN JUAN, TX 78589"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV030", storeName: "MONTE CRISTO", address: "1120 W MONTE CRISTO RD - EDINBURG, TX 78541"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV031", storeName: "BUSINESS HWY 83", address: "1513 E BUSINESS HIGHWAY 83 STE 115 - DONNA, TX 78537"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV026", storeName: "CANTON", address: "1560 E CANTON RD - EDINBURG, TX 78542"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV036", storeName: "UNIVERSITY", address: "1022 E UNIVERSITY DR - EDINBURG, TX 78539"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV027", storeName: "FM 495", address: "1209 E FM 495 STE 7 - SAN JUAN, TX 78589"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "MUNSIF MUHAMMAD", storeId: "PURERGV035", storeName: "RAUL LONGORIA", address: "2604 N RAUL LONGORIA RD STE 106 - SAN JUAN, TX 78589"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV034", storeName: "3 MILE", address: "2105 WEST 3 MILE RD. SUITE 5 - MISSION, TX 78573"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV019", storeName: "7 MILE", address: "6302 W MILE 7 RD - MISSION, TX 78574"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV003", storeName: "EDINBURG", address: "1649 W UNIVERSITY DR - EDINBURG, TX 78539"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV013", storeName: "MAIN", address: "3502 W MAIN AVE - MISSION, TX 78574"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV005", storeName: "MCALLEN", address: "3614 W PECAN BLVD - MCALLEN, TX 78501"},
+            {market: "RGV", md: "WAQAS IQBAL", dm: "THERESA GARCIA", storeId: "PURERGV033", storeName: "N 23RD ST", address: "500 N 23RD ST STE 50 - MCALLEN, TX 78501"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA039", storeName: "1619 BABCOCK RD", address: "1619 BABCOCK RD - SAN ANTONIO, TX 78229"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA040", storeName: "5601 BANDERA RD", address: "5601 BANDERA RD - SAN ANTONIO, TX 78238"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA038", storeName: "6819 SAN PEDRO", address: "6819 SAN PEDRO AVE - SAN ANTONIO, TX 78216"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA032", storeName: "7321 SAN PEDRO", address: "7321 SAN PEDRO AVE UNIT 3 - SAN ANTONIO, TX 78216"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA034", storeName: "7428 MILITARY", address: "7428 W MILITARY DR - SAN ANTONIO, TX 78227"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA036", storeName: "FREDERICKSBURG", address: "3701 FREDERICKSBURG RD - SAN ANTONIO, TX 78201"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA037", storeName: "NACOGDOCHES", address: "14086 NACOGDOCHES RD - SAN ANTONIO, TX 78247"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA029", storeName: "TIMBERHILL", address: "5251 TIMBERHILL DR - SAN ANTONIO, TX 78238"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA035", storeName: "VALLEY HI", address: "341 VALLEY HI DR STE 103 - SAN ANTONIO, TX 78227"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "MAJID KHAN", storeId: "PURESA033", storeName: "WALZEM", address: "5231 WALZEM RD - WINDCREST, TX 78218"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA001", storeName: "BANDERA", address: "606 BANDERA RD - SAN ANTONIO, TX 78228"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA002", storeName: "CALLAGHAN", address: "5835 CULEBRA RD - SAN ANTONIO, TX 78228"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA004", storeName: "CULEBRA", address: "7614 CULEBRA RD - SAN ANTONIO, TX 78251"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA005", storeName: "CUPPLES", address: "1120 CUPPLES RD - SAN ANTONIO, TX 78226"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA006", storeName: "FM 78", address: "9075 FM 78 - CONVERSE, TX 78109"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA007", textName: "HACKBERRY", address: "4726 S HACKBERRY - SAN ANTONIO, TX 78223", storeName: "HACKBERRY"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA008", storeName: "HEB- LAS PALMAS", address: "721 CASTROVILLE - SAN ANTONIO, TX 78237"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA009", storeName: "NEW LAREDO", address: "465 NEW LAREDO HWY - SAN ANTONIO, TX 78211"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA010", storeName: "POTEET", address: "1007 POTEET JOURDANTON FWY - SAN ANTONIO, TX 78224"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA030", storeName: "SW MILITARY", address: "930 SW MILITARY DR - SAN ANTONIO, TX 78221"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA031", storeName: "VANCE JACKSON", address: "2329 VANCE JACKSON RD - SAN ANTONIO, TX 78213"},
+            {market: "SAN ANTONIO", md: "WAQAS IQBAL", dm: "PARVEZ DHANANI", storeId: "PURESA011", storeName: "WEST HQ", address: "3012 WEST AVE - SAN ANTONIO, TX 78201"},
+            {market: "TAMPA", md: "WAQAS IQBAL", dm: "DAYANE HIDALGO", storeId: "PUREFL001", storeName: "49TH ST N", address: "7121 49TH ST N - PINELLAS PARK, FL 33781"},
+            {market: "TAMPA", md: "WAQAS IQBAL", dm: "DAYANE HIDALGO", storeId: "PUREFL002", storeName: "N ARMENIA AVE", address: "6804 N ARMENIA AVE - TAMPA, FL 33604"},
+            {market: "TAMPA", md: "WAQAS IQBAL", dm: "DAYANE HIDALGO", storeId: "PUREFL003", storeName: "RIVERVIEW", address: "9850 US HIGHWAY 301 S - RIVERVIEW, FL 33578"},
+            {market: "TAMPA", md: "WAQAS IQBAL", dm: "DAYANE HIDALGO", storeId: "PUREFL004", storeName: "W BLOOMINGDALE AVE", address: "809 W BLOOMINGDALE AVE - BRANDON, FL 33511"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK001", storeName: "129TH", address: "12915 E 31ST ST - TULSA, OK 74134"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK016", storeName: "1515 N HARVARD AVE STE K", address: "1515 N HARVARD AVE STE K - TULSA, OK 74115"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK017", storeName: "1605 N PEORIA AVE", address: "1605 N PEORIA AVE - TULSA, OK 74106"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK015", storeName: "1950 S GARNETT RD", address: "1950 S GARNETT RD - TULSA, OK 74128"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK012", storeName: "E ADMIRAL PL", address: "7307 E ADMIRAL PL - TULSA, OK 74115"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK011", storeName: "E. 61ST STREET", address: "2216 - 2218 E. 61ST STREET - TULSA, OK 74136"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK004", storeName: "GARNETT", address: "10915 E 31ST ST - TULSA, OK 74146"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK005", storeName: "LEWIS", address: "1619 N LEWIS AVE - TULSA, OK 74110"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK010", storeName: "PAYLESS", address: "2175 S SHERIDAN RD - TULSA, OK 74129"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK014", storeName: "S PEORIA AVE", address: "6308 S PEORIA AVE - TULSA, OK 74136"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK007", storeName: "SAND SPRINGS", address: "426 PLAZA CT - SAND SPRINGS, OK 74063"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK008", storeName: "SHERIDAN RD", address: "834 N SHERIDAN RD - TULSA, OK 74115"},
+            {market: "TULSA", md: "WAQAS IQBAL", dm: "SHOAIB ALI", storeId: "PUREOK009", storeName: "UNION", address: "4997 S UNION AVE - TULSA, OK 74107"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC003", storeName: "HILLCREST", address: "3300 HILLCREST DR - WACO, TX 76708"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC006", storeName: "HILLSBORO", address: "346 S COVINGTON ST - HILLSBORO, TX 76645"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC007", storeName: "I35", address: "903 N INTERSTATE 35 - BELLMEAD, TX 76705"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC008", storeName: "N VALLEY MILLS", address: "1619 N VALLEY MILLS DR - WACO, TX 76710"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC009", storeName: "PARK LAKE", address: "1920 PARK LAKE DR - WACO, TX 76708"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC010", storeName: "S VALLEY MILLS", address: "1821 S VALLEY MILLS DR - WACO, TX 76711"},
+            {market: "WACO", md: "WAQAS IQBAL", dm: "SHEHRIZ LAKHANI", storeId: "PUREWAC002", storeName: "WACO DR", address: "1300 W WACO DR - WACO, TX 76701"}
+        ];
+
+        // State Management
+        let dataset = [];
+        let isAdmin = false;
+        const ADMIN_PASSWORD = "admin"; // Set your preferred passcode here
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load from LocalStorage if available, otherwise use initialDataset
+            const stored = localStorage.getItem('nexus_calling_tree_data');
+            if (stored) {
+                dataset = JSON.parse(stored);
+            } else {
+                dataset = [...initialDataset];
+                saveToLocalStorage();
+            }
+
+            lucide.createIcons();
+            populateDropdowns();
+            renderStats();
+            renderDirectory();
+            setupDatalists();
+        });
+
+        // Save data state locally in user's browser
+        function saveToLocalStorage() {
+            localStorage.setItem('nexus_calling_tree_data', JSON.stringify(dataset));
+        }
+
+        // Dynamically compute KPIs
+        function renderStats() {
+            const uniqueDms = new Set(dataset.map(item => item.dm)).size;
+            const uniqueMarkets = new Set(dataset.map(item => item.market)).size;
+            
+            document.getElementById('stat-dm-count').innerText = uniqueDms;
+            document.getElementById('stat-market-count').innerText = uniqueMarkets;
+            document.getElementById('stat-store-count').innerText = dataset.length;
+        }
+
+        // Dropdown dynamic populators
+        function populateDropdowns() {
+            const dms = [...new Set(dataset.map(item => item.dm))].sort();
+            const markets = [...new Set(dataset.map(item => item.market))].sort();
+
+            const dmSelect = document.getElementById('dm-select');
+            const marketSelect = document.getElementById('market-select');
+
+            // Clear extra values
+            dmSelect.innerHTML = '<option value="">All District Managers</option>';
+            marketSelect.innerHTML = '<option value="">All Markets</option>';
+
+            dms.forEach(dm => {
+                dmSelect.innerHTML += `<option value="${dm}">${dm}</option>`;
+            });
+
+            markets.forEach(m => {
+                marketSelect.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+        }
+
+        function setupDatalists() {
+            const dms = [...new Set(dataset.map(item => item.dm))].sort();
+            const markets = [...new Set(dataset.map(item => item.market))].sort();
+
+            document.getElementById('dm-datalist').innerHTML = dms.map(d => `<option value="${d}">`).join('');
+            document.getElementById('market-datalist').innerHTML = markets.map(m => `<option value="${m}">`).join('');
+        }
+
+        // Main Search/Filter implementation
+        function applyFilters() {
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const selectedDm = document.getElementById('dm-select').value;
+            const selectedMarket = document.getElementById('market-select').value;
+
+            const filtered = dataset.filter(store => {
+                const matchesSearch = store.storeId.toLowerCase().includes(searchQuery) ||
+                                      store.storeName.toLowerCase().includes(searchQuery) ||
+                                      store.address.toLowerCase().includes(searchQuery);
+                const matchesDm = selectedDm === "" || store.dm === selectedDm;
+                const matchesMarket = selectedMarket === "" || store.market === selectedMarket;
+
+                return matchesSearch && matchesDm && matchesMarket;
+            });
+
+            // Update Dynamic Calling Tree visualization on left
+            if (filtered.length > 0) {
+                document.getElementById('escalation-dm-name').innerText = `${filtered[0].dm} — DM Escalation`;
+            } else {
+                document.getElementById('escalation-dm-name').innerText = "Direct escalation contact";
+            }
+
+            renderDirectory(filtered);
+        }
+
+        // Render Cards View
+        function renderDirectory(itemsToRender = dataset) {
+            const container = document.getElementById('store-grid');
+            container.innerHTML = "";
+
+            document.getElementById('results-count').innerText = `Showing ${itemsToRender.length} nodes`;
+
+            if (itemsToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500">
+                        <i data-lucide="info" class="w-12 h-12 mx-auto mb-2 text-slate-600"></i>
+                        No stores found matching active search criteria.
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            itemsToRender.forEach((store, index) => {
+                // Find actual global index in full array
+                const globalIndex = dataset.findIndex(x => x.storeId === store.storeId);
+
+                const cardHTML = `
+                    <div class="dark-card rounded-xl p-5 hover:border-slate-500 transition-all space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs bg-slate-800 text-slate-300 font-semibold px-2 py-0.5 rounded uppercase">
+                                    ${store.storeId}
+                                </span>
+                                <h3 class="text-md font-bold text-white mt-1.5">${store.storeName}</h3>
+                            </div>
+                            
+                            <!-- Admin Node Controls -->
+                            <div class="${isAdmin ? 'flex' : 'hidden'} gap-1.5">
+                                <button onclick="openStoreModal(${globalIndex})" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 transition-colors" title="Edit Node">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteStoreNode(${globalIndex})" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-rose-400 hover:text-rose-300 transition-colors" title="Delete Node">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="text-xs space-y-1.5 text-slate-400 border-t border-slate-700/50 pt-3">
+                            <div class="flex justify-between">
+                                <span>Market Area:</span>
+                                <span class="text-slate-200 font-semibold">${store.market}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>District Manager (DM):</span>
+                                <span class="text-slate-200 font-semibold">${store.dm}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Escalation Contact (MD):</span>
+                                <span class="text-slate-200 font-semibold">${store.md}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#0F172A] rounded-lg p-2.5 flex items-start gap-2 text-xs text-slate-400">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-500 shrink-0 mt-0.5"></i>
+                            <span>${store.address}</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+
+            lucide.createIcons();
+        }
+
+        // Admin Security/Toggles
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                const pass = prompt("Enter Nexus Admin Passcode:");
+                if (pass === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    document.getElementById('admin-status-text').innerText = "Admin Unlocked";
+                    document.getElementById('admin-toggle-btn').classList.replace('bg-slate-800', 'bg-emerald-950');
+                    document.getElementById('admin-toggle-btn').classList.replace('text-slate-300', 'text-emerald-400');
+                    
+                    const icon = document.getElementById('admin-icon');
+                    icon.setAttribute('data-lucide', 'unlock');
+                    icon.classList.replace('text-amber-500', 'text-emerald-400');
+                    
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    applyFilters(); // re-render to display Edit/Delete buttons on cards
+                } else if (pass !== null) {
+                    alert("Incorrect system passcode. Unauthorized access denied.");
+                }
+            } else {
+                // Log Out
+                isAdmin = false;
+                document.getElementById('admin-status-text').innerText = "Admin Login";
+                document.getElementById('admin-toggle-btn').classList.replace('bg-emerald-950', 'bg-slate-800');
+                document.getElementById('admin-toggle-btn').classList.replace('text-emerald-400', 'text-slate-300');
+                
+                const icon = document.getElementById('admin-icon');
+                icon.setAttribute('data-lucide', 'lock');
+                icon.classList.replace('text-emerald-400', 'text-amber-500');
+                
+                document.getElementById('admin-panel').classList.add('hidden');
+                applyFilters(); // hide Edit/Delete buttons on cards
+            }
+            lucide.createIcons();
+        }
+
+        // Store Modal Controls (Add/Edit)
+        function openStoreModal(index = null) {
+            const modal = document.getElementById('store-modal');
+            const form = document.getElementById('store-form');
+            form.reset();
+
+            if (index !== null) {
+                // Edit Node Mode
+                const store = dataset[index];
+                document.getElementById('modal-title').innerText = "Edit Store Node";
+                document.getElementById('modal-store-idx').value = index;
+                document.getElementById('modal-store-id').value = store.storeId;
+                document.getElementById('modal-store-id').setAttribute('readonly', true);
+                document.getElementById('modal-store-name').value = store.storeName;
+                document.getElementById('modal-market').value = store.market;
+                document.getElementById('modal-dm').value = store.dm;
+                document.getElementById('modal-md').value = store.md;
+                document.getElementById('modal-address').value = store.address;
+            } else {
+                // Add Mode
+                document.getElementById('modal-title').innerText = "Add Store Node";
+                document.getElementById('modal-store-idx').value = "";
+                document.getElementById('modal-store-id').removeAttribute('readonly');
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeStoreModal() {
+            document.getElementById('store-modal').classList.add('hidden');
+        }
+
+        // Global Reassign Modal Controls
+        function openGlobalModal() {
+            const modal = document.getElementById('global-modal');
+            document.getElementById('global-form').reset();
+            updateGlobalModalDropdown();
+            modal.classList.remove('hidden');
+        }
+
+        function closeGlobalModal() {
+            document.getElementById('global-modal').classList.add('hidden');
+        }
+
+        // Dynamically fill the "Current Value" select in the global modal
+        function updateGlobalModalDropdown() {
+            const type = document.getElementById('global-type').value;
+            const select = document.getElementById('global-current-value');
+            select.innerHTML = '<option value="">-- Choose Target --</option>';
+
+            let values = [];
+            if (type === 'dm') {
+                values = [...new Set(dataset.map(item => item.dm))].sort();
+            } else if (type === 'md') {
+                values = [...new Set(dataset.map(item => item.md))].sort();
+            } else if (type === 'market') {
+                values = [...new Set(dataset.map(item => item.market))].sort();
+            }
+
+            values.forEach(v => {
+                select.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+        }
+
+        // Handle Global Submit Operation
+        function handleGlobalSubmit(event) {
+            event.preventDefault();
+
+            const type = document.getElementById('global-type').value;
+            const oldValue = document.getElementById('global-current-value').value;
+            let newValue = document.getElementById('global-new-value').value.toUpperCase().trim();
+
+            if (!oldValue) {
+                alert("Please select a target value to reassign.");
+                return;
+            }
+
+            let count = 0;
+            dataset.forEach(store => {
+                if (type === 'dm' && store.dm === oldValue) {
+                    store.dm = newValue;
+                    count++;
+                } else if (type === 'md' && store.md === oldValue) {
+                    store.md = newValue;
+                    count++;
+                } else if (type === 'market' && store.market === oldValue) {
+                    store.market = newValue;
+                    count++;
+                }
+            });
+
+            if (count > 0) {
+                saveToLocalStorage();
+                renderStats();
+                populateDropdowns();
+                setupDatalists();
+                applyFilters();
+                alert(`Successfully updated role records across ${count} stores.`);
+                closeGlobalModal();
+            } else {
+                alert("No matching records found to update.");
+            }
+        }
+
+        // Handle Add/Edit submit operations
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const indexVal = document.getElementById('modal-store-idx').value;
+            const updatedNode = {
+                market: document.getElementById('modal-market').value.toUpperCase().trim(),
+                md: document.getElementById('modal-md').value.toUpperCase().trim(),
+                dm: document.getElementById('modal-dm').value.toUpperCase().trim(),
+                storeId: document.getElementById('modal-store-id').value.toUpperCase().trim(),
+                storeName: document.getElementById('modal-store-name').value.trim(),
+                address: document.getElementById('modal-address').value.trim()
+            };
+
+            if (indexVal !== "") {
+                // Update Node
+                dataset[parseInt(indexVal)] = updatedNode;
+            } else {
+                // Add Node
+                // Validate duplicate check
+                const exists = dataset.some(x => x.storeId === updatedNode.storeId);
+                if (exists) {
+                    alert("A store node with this Store ID already exists.");
+                    return;
+                }
+                dataset.push(updatedNode);
+            }
+
+            saveToLocalStorage();
+            renderStats();
+            populateDropdowns();
+            setupDatalists();
+            applyFilters();
+            closeStoreModal();
+        }
+
+        // Delete Store Nodes
+        function deleteStoreNode(index) {
+            const confirmed = confirm(`Are you sure you want to delete store node ${dataset[index].storeId} (${dataset[index].storeName})? This cannot be undone.`);
+            if (confirmed) {
+                dataset.splice(index, 1);
+                saveToLocalStorage();
+                renderStats();
+                populateDropdowns();
+                setupDatalists();
+                applyFilters();
+            }
+        }
+
+        // Export To CSV backup engine
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "MARKET,MD,DM,STORE ID,STORE NAME,ADDRESS\n";
+
+            dataset.forEach(row => {
+                const addressEscaped = row.address.includes(",") ? `"${row.address}"` : row.address;
+                csvContent += `${row.market},${row.md},${row.dm},${row.storeId},${row.storeName},${addressEscaped}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `nexus_support_calling_tree_backup.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
