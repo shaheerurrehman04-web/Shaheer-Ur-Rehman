@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase">District Managers</p>
-                    <p class="text-xl font-bold text-white" id="stat-dm-count">18</p>
+                    <p class="text-xl font-bold text-white" id="stat-dm-count">0</p>
                 </div>
             </div>
             <!-- Active Markets Card -->
@@ -77,7 +77,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase">Active Markets</p>
-                    <p class="text-xl font-bold text-white" id="stat-market-count">12</p>
+                    <p class="text-xl font-bold text-white" id="stat-market-count">0</p>
                 </div>
             </div>
             <!-- Total Stores Card -->
@@ -87,7 +87,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase">Total Stores</p>
-                    <p class="text-xl font-bold text-white" id="stat-store-count">135</p>
+                    <p class="text-xl font-bold text-white" id="stat-store-count">0</p>
                 </div>
             </div>
         </div>
@@ -284,6 +284,9 @@
 
     <!-- Script Area containing Dataset & App logic -->
     <script>
+        // Database versioning system to force browser cache clears on team redeploys
+        const DB_VERSION = "v_dataset_2_0"; 
+
         // Default Dataset extracted from user's CSV data
         const initialDataset = [
             {market: "CORPUS CHRISTI", dm: "WAQAS IQBAL", storeId: "PURECOR013", storeName: "6410 WEBER", address: "6410 WEBER RD - CORPUS CHRISTI, TX 78413"},
@@ -452,13 +455,16 @@
 
         // Initialize Application
         window.addEventListener('DOMContentLoaded', () => {
-            // Load from LocalStorage if available, otherwise use initialDataset
+            const storedVersion = localStorage.getItem('nexus_db_version');
             const stored = localStorage.getItem('nexus_calling_tree_data');
-            if (stored) {
-                dataset = JSON.parse(stored);
-            } else {
+            
+            // Auto-detect version mismatch & force update cache
+            if (storedVersion !== DB_VERSION || !stored) {
                 dataset = [...initialDataset];
                 saveToLocalStorage();
+                localStorage.setItem('nexus_db_version', DB_VERSION);
+            } else {
+                dataset = JSON.parse(stored);
             }
 
             lucide.createIcons();
@@ -592,7 +598,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>Escalation Contact (MD):</span>
-                                <span class="text-slate-200 font-semibold">${store.md}</span>
+                                <span class="text-slate-200 font-semibold">${store.md || 'WAQAS IQBAL'}</span>
                             </div>
                         </div>
 
@@ -660,7 +666,7 @@
                 document.getElementById('modal-store-name').value = store.storeName;
                 document.getElementById('modal-market').value = store.market;
                 document.getElementById('modal-dm').value = store.dm;
-                document.getElementById('modal-md').value = store.md;
+                document.getElementById('modal-md').value = store.md || 'WAQAS IQBAL';
                 document.getElementById('modal-address').value = store.address;
             } else {
                 // Add Mode
@@ -698,7 +704,7 @@
             if (type === 'dm') {
                 values = [...new Set(dataset.map(item => item.dm))].sort();
             } else if (type === 'md') {
-                values = [...new Set(dataset.map(item => item.md))].sort();
+                values = [...new Set(dataset.map(item => item.md || 'WAQAS IQBAL'))].sort();
             } else if (type === 'market') {
                 values = [...new Set(dataset.map(item => item.market))].sort();
             }
@@ -723,6 +729,9 @@
 
             let count = 0;
             dataset.forEach(store => {
+                // Fallback handling for md missing from datasets
+                if (!store.md) store.md = 'WAQAS IQBAL';
+
                 if (type === 'dm' && store.dm === oldValue) {
                     store.dm = newValue;
                     count++;
@@ -800,11 +809,11 @@
         // Export To CSV backup engine
         function exportToCSV() {
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "MARKET,MD,DM,STORE ID,STORE NAME,ADDRESS\n";
+            csvContent += "MARKET,DM,STORE ID,STORE NAME,ADDRESS\n";
 
             dataset.forEach(row => {
                 const addressEscaped = row.address.includes(",") ? `"${row.address}"` : row.address;
-                csvContent += `${row.market},${row.md},${row.dm},${row.storeId},${row.storeName},${addressEscaped}\n`;
+                csvContent += `${row.market},${row.dm},${row.storeId},${row.storeName},${addressEscaped}\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
