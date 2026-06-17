@@ -230,7 +230,7 @@
                 </div>
                 <div>
                     <label class="text-xs text-slate-400 block mb-1">Managing Director (MD)</label>
-                    <input type="text" id="modal-md" required value="WAQAS IQBAL" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none">
+                    <input type="text" id="modal-md" required value="." class="w-full bg-[#0F172A] border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none">
                 </div>
                 <div>
                     <label class="text-xs text-slate-400 block mb-1">Address</label>
@@ -285,7 +285,7 @@
     <!-- Script Area containing Dataset & App logic -->
     <script>
         // Database versioning system to force browser cache clears on team redeploys
-        const DB_VERSION = "v_dataset_2_0"; 
+        const DB_VERSION = "v_dataset_2_1"; 
 
         // Default Dataset extracted from user's CSV data
         const initialDataset = [
@@ -598,7 +598,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>Escalation Contact (MD):</span>
-                                <span class="text-slate-200 font-semibold">${store.md || 'WAQAS IQBAL'}</span>
+                                <span class="text-slate-200 font-semibold">${store.md || '.'}</span>
                             </div>
                         </div>
 
@@ -666,7 +666,7 @@
                 document.getElementById('modal-store-name').value = store.storeName;
                 document.getElementById('modal-market').value = store.market;
                 document.getElementById('modal-dm').value = store.dm;
-                document.getElementById('modal-md').value = store.md || 'WAQAS IQBAL';
+                document.getElementById('modal-md').value = store.md || '.';
                 document.getElementById('modal-address').value = store.address;
             } else {
                 // Add Mode
@@ -678,6 +678,7 @@
             modal.classList.remove('hidden');
         }
 
+        // Close Store Modal Window
         function closeStoreModal() {
             document.getElementById('store-modal').classList.add('hidden');
         }
@@ -704,7 +705,7 @@
             if (type === 'dm') {
                 values = [...new Set(dataset.map(item => item.dm))].sort();
             } else if (type === 'md') {
-                values = [...new Set(dataset.map(item => item.md || 'WAQAS IQBAL'))].sort();
+                values = [...new Set(dataset.map(item => item.md || '.'))].sort();
             } else if (type === 'market') {
                 values = [...new Set(dataset.map(item => item.market))].sort();
             }
@@ -730,7 +731,7 @@
             let count = 0;
             dataset.forEach(store => {
                 // Fallback handling for md missing from datasets
-                if (!store.md) store.md = 'WAQAS IQBAL';
+                if (!store.md) store.md = '.';
 
                 if (type === 'dm' && store.dm === oldValue) {
                     store.dm = newValue;
